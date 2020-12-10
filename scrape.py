@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from collections import defaultdict, namedtuple
+from functools import reduce
 '''
 data from https://www.footballdb.com/games/index.html
 '''
@@ -115,25 +116,30 @@ def startup(stop):
     makeRecords()
     calcStrength()
     
-def compare2(team1, team2):
-    if team1 not in teams:
-        try:
-            team1 = [team for team in teams if teams[team].abbreviation == team1][0]
-        except IndexError:
-            print(f"Don't recognize {team1}")
-            return
-    if team2 not in teams:
-        try:
-            team2 = [team for team in teams if teams[team].abbreviation == team2][0]
-        except IndexError:
-            print(f"Don't recognize {team2}")
-            return
-    if teams[team1].conference != teams[team2].conference:
-        raise(ValueError("Can't compare teams in different conferences"))
-    if teams[team1].division == teams[team2].division:
-        compare2Division(team1, team2)
+  
+def lookup(team):
+    if team in teams:
+        return team
+    try:
+        return [t for t in teams if teams[t].abbreviation == team][0]
+    except IndexError:
+        print(f"Don't recognize {team}")
+        raise
+    
+def compare(*args):
+    try:
+        args =[lookup(team) for team in args]
+    except IndexError:
+        return
+    conferences = {teams[team].conference for team in args}
+    if len(conferences)>1:
+        print("Can't compare teams in different conferences")
+        return
+    divisions = {teams[team].division for team in args}
+    if len(divisions) == 1:
+        compareDivision(*args)
     else:
-        compare2Wild(team1, team2)
+        compare2Wild(*args)
         
 def compare2Wild(team1, team2):
     print()
@@ -151,33 +157,33 @@ def compare2Wild(team1, team2):
     netPointsConf2(team1, team2)
     netPointsOverall2(team1, team2)
         
-def compare2Division(team1, team2):
+def compareDivision(*args):
     print()
     print('Overall')
-    for t in team1, team2:
+    for t in args:
         r = records[t]
         print(f'  {t:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')
-    head2(team1, team2) 
-    divsion2(team1, team2)
-    commonGames2(team1, team2)
-    conference2(team1, team2)
-    victory2(team1, team2)
-    schedule2(team1, team2)
-    combinedRankConf2(team1, team2)
-    combinedRankOverall2(team1, team2) 
-    netPointsCommon2(team1, team2)
-    netPointsOverall2  (team1, team2)
+    head2headDivision(*args) 
+    divsion(*args)
+    commonGames(*args)
+    conference(*args)
+    victory(*args)
+    #schedule2(team1, team2)
+    #combinedRank2Conf2(team1, team2)
+    #combinedRankOverall2(team1, team2) 
+    #netPointsCommon2(team1, team2)
+    #netPointsOverall2  (team1, team2)
     
-def conference2(team1, team2):
+def conference(args):
     print('Conference')
-    for t in team1, team2:
+    for t in args:
         r = conferenceRecords[t]
         print(f'  {t:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')  
     print()
     
-def divsion2(team1, team2):
+def divsion(*args):
     print('Division')
-    for team in team1, team2:
+    for team in args:
         divGames = [g for g in games[team] if g.division]
         wins = len([g for g in divGames if g.result=='win'])
         losses = len([g for g in divGames if g.result=='loss'])
@@ -186,51 +192,63 @@ def divsion2(team1, team2):
         print(f'  {team:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')  
     print()   
     
-def head2(team1, team2):
+def head2headDivision(*args):
     print('\nHead to Head:')
-    meet = [g for g in games[team1] if g.opponent == team2] 
-    if not meet:
-        print('  Not Applicable\n')
-        return
-    for game in meet:
-        print(f'  {game.date} ', end='')
-        if game.result=='upcoming':
-            print('Upcoming')
-        elif game.result == 'tie':
-            print('Tie')
-        elif game.result == 'win':
-            print( f'Winner {team1}')
-        else:
-            print(f'Winner {team2}')
-    print()    
+    results = dict()
+    for team in args:
+        print(f'\n  {team}')
+        meet = [g for g in games[team] if g.opponent in args] 
+        for game in meet:
+            print(f'    {game.date} vs {game.opponent}  {game.result.title()}')
+        wins = len([game for game in meet if game.result == 'win'])
+        losses = len([game for game in meet if game.result == 'loss'])
+        ties = len([game for game in meet if game.result == 'tie'])
+        results[team] = Record(wins, losses, ties)
+    print()
+    for team in args:
+        r = results[team]
+        print(f'  {team:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')
+    print()
     
-def commonGames2(team1, team2):
+def commonGames(*args):
     opponents = { }
-    for team in team1, team2:
-        opponents[team] = [g.opponent for g in games[team]]  
-    common = [team for team in teams if team in opponents[team1] and team in opponents[team2]]
+    results = { }
+    for team in args:
+        opponents[team] = {g.opponent for g in games[team]}  
+        common = reduce(lambda x, y: x&y, opponents.values(), {team for team in teams})
+        count = 0
+        for team in args:
+            count += len([g for g in games[team] if g.opponent in common])
     print('Common Opponents')
-    for team in team1, team2:
+    if count < 4:
+        print('  Insufficient common games')
+        # Cannot happen in division
+        return
+    for team in args:
         print(f'  {team}')
         wins = 0
         losses = 0
         ties = 0
         for g in games[team]:
             if g.opponent in common:
-                print(f'    {g.date} {g.opponent} {g.result}')
+                print(f'    {g.date} vs {g.opponent} {g.result.title()}')
                 if g.result == 'win':
                     wins += 1
                 elif g.result == 'loss':
                     losses += 1
                 elif g.result == 'tie':
                     ties += 1
-        r = Record(wins, losses, ties)
-        print (f'  {wins}-{losses}-{ties} {pct(r):.3f}%') 
+        results[team] = Record(wins, losses, ties) 
         print()
+    for team in args:
+        r = results[team]
+        print(f'  {team:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')
+    print()
+        
     
-def victory2(team1, team2):
+def victory(*BeautifulSoup):
     print('Strength of Victory')
-    for t in team1, team2:
+    for t in args:
         r = victoryStrength[t]
         print(f'  {t:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')  
     print()    
@@ -299,4 +317,4 @@ def netPointsCommon2(team1, team2):
     print()    
           
 startup('2020-12-09')
-compare2('KC', 'LV')
+compare('KC', 'LV', 'LAC')

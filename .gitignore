@@ -1,3 +1,4 @@
 *.wpr
 *pycache*
+*.wpu
 
