@@ -1,0 +1,32 @@
+Arizona Cardinals   NFC   West ARI
+ Atlanta Falcons   NFC   South ATL
+ Baltimore Ravens   AFC   North BAL
+ Buffalo Bills   AFC   East BUF
+ Carolina Panthers   NFC   South CAR
+ Chicago Bears   NFC   North CHI
+ Cincinnati Bengals   AFC   North CIN
+ Cleveland Browns   AFC   North CLE
+ Dallas Cowboys   NFC   East DAL
+ Denver Broncos   AFC   West DEN
+ Detroit Lions   NFC   North DET
+ Green Bay Packers   NFC   North GB
+ Houston Texans   AFC   South HOU
+ Indianapolis Colts   AFC   South IND
+ Jacksonville Jaguars   AFC   South JAX
+ Kansas City Chiefs   AFC   West KC
+ Las Vegas Raiders   AFC   West LV
+ Los Angeles Chargers   AFC   West LAC
+ Los Angeles Rams   NFC   West LAR
+ Miami Dolphins   AFC   East MIA
+ Minnesota Vikings   NFC   North MIN
+ New England Patriots   AFC   East NE
+ New Orleans Saints   NFC   South NO
+ New York Giants   NFC   East NYG
+ New York Jets   AFC   East NYJ
+ Philadelphia Eagles   NFC   East PHI
+ Pittsburgh Steelers   AFC   North PIT
+ San Francisco 49ers   NFC   West SEA
+ Seattle Seahawks   NFC   West SF
+ Tampa Bay Buccaneers   NFC   South TB
+ Tennessee Titans   AFC   South TEN
+ Washington Football Team   NFC   East WAS
