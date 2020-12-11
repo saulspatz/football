@@ -335,5 +335,5 @@ def printRecord(team, rec):
     except ZeroDivisionError:
         print(f'  {team:25s} {rec.wins}-{rec.losses}-{rec.ties}')
         
-startup('2020-12-09')
-compare('KC', 'BUF', 'PIT')
+#startup('2020-12-11')
+#compare('KC', 'PIT')
