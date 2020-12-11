@@ -168,13 +168,13 @@ def compareDivision(*args):
     commonGames(*args)
     conference(*args)
     victory(*args)
-    #schedule2(team1, team2)
-    #combinedRank2Conf2(team1, team2)
-    #combinedRankOverall2(team1, team2) 
-    #netPointsCommon2(team1, team2)
-    #netPointsOverall2  (team1, team2)
+    schedule(*args)
+    combinedRankConference(*args)
+    combinedRankOverall(*args) 
+    netPointsCommon(*args)
+    #netPointsOverall2(team1, team2)
     
-def conference(args):
+def conference(*args):
     print('Conference')
     for t in args:
         r = conferenceRecords[t]
@@ -246,22 +246,22 @@ def commonGames(*args):
     print()
         
     
-def victory(*BeautifulSoup):
+def victory(*args):
     print('Strength of Victory')
     for t in args:
         r = victoryStrength[t]
         print(f'  {t:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')  
     print()    
     
-def schedule2(team1, team2):
+def schedule(*args):
     print('Strength of Schedule')
-    for t in team1, team2:
+    for t in args:
         r = scheduleStrength[t]
         print(f'  {t:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')  
     print()    
     
-def combinedRankConf2(team1, team2):
-    conf = teams[team1].conference
+def combinedRankConference(*args):
+    conf = teams[args[0]].conference
     scored = [v for v in pointsFor.items() if teams[v[0]].conference == conf]
     allowed = [v for v in pointsAgainst.items() if teams[v[0]].conference == conf]    
     scored.sort(key = lambda x:x[1], reverse=True)
@@ -270,13 +270,13 @@ def combinedRankConf2(team1, team2):
     allowed = [a[0] for a in allowed]
     print('Combined Points Rank in Conference')
     print('(Lower is better)')
-    for team in team1, team2:
+    for team in args:
         s = scored.index(team)+1
         a = allowed.index(team)+1 
         print(f'  {team:25s} scored {s} allowed {a} combined {a+s}')
     print()
 
-def combinedRankOverall2(team1, team2):
+def combinedRankOverall(*args):
     scored = [v for v in pointsFor.items()]
     allowed = [v for v in pointsAgainst.items()]    
     scored.sort(key = lambda x:x[1], reverse=True)
@@ -285,7 +285,7 @@ def combinedRankOverall2(team1, team2):
     allowed = [a[0] for a in allowed]
     print('Combined Points Rank Overall')
     print('(Lower is better)')
-    for team in team1, team2:
+    for team in args:
         s = scored.index(team)+1
         a = allowed.index(team)+1 
         print(f'  {team:25s} scored {s} allowed {a} combined {a+s}')
@@ -298,20 +298,20 @@ def netPointsConf2(team1, team2):
         print(f'  {team:25s} {net}')
     print()
     
-def netPointsOverall2(team1, team2):
+def netPointsOverall(*args):
     print('Net Points in All Games')
-    for team in team1, team2:
+    for team in args:
         net = pointsFor[team] - pointsAgainst[team]
         print(f'  {team:25s} {net}')
     print()
     
-def netPointsCommon2(team1, team2):
+def netPointsCommon(*args):
     opponents = { }
-    for team in team1, team2:
-        opponents[team] = [g.opponent for g in games[team]]  
-    common = [team for team in teams if team in opponents[team1] and team in opponents[team2]]
+    for team in args:
+        opponents[team] = {g.opponent for g in games[team]}  
+        common = reduce(lambda x, y: x&y, opponents.values(), {team for team in teams})
     print('Net Points Common Games')
-    for team in team1, team2:
+    for team in args:
         net = sum(g.scored - g.allowed for g in games[team] if g.opponent in common)
         print(f'  {team:25s} {net}')
     print()    
