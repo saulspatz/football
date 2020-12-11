@@ -146,14 +146,14 @@ def compare(*args):
 def compareWildCard(*args):
     print()
     print('Overall')
-    for t in args:
-        r = records[t]
-        print(f'  {t:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')
+    for team in args:
+        printRecord(team, records[team])
+    print()
     head2headSweep(*args)
     conference(*args)
     commonGames(*args)
-    victory2(*args)
-    schedule2(*args)
+    victory(*args)
+    schedule(*args)
     combinedRankConference(*args)
     combinedRankOverall(*args)
     netPointsConference(*args)
@@ -162,9 +162,9 @@ def compareWildCard(*args):
 def compareDivision(*args):
     print()
     print('Overall')
-    for t in args:
-        r = records[t]
-        print(f'  {t:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')
+    for team in args:
+        printRecord(team, records[team])
+    print()
     head2headDivision(*args) 
     divsion(*args)
     commonGames(*args)
@@ -178,9 +178,8 @@ def compareDivision(*args):
     
 def conference(*args):
     print('Conference')
-    for t in args:
-        r = conferenceRecords[t]
-        print(f'  {t:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')  
+    for team in args:
+        printRecord(team, conferenceRecords[team])
     print()
     
 def divsion(*args):
@@ -191,7 +190,7 @@ def divsion(*args):
         losses = len([g for g in divGames if g.result=='loss'])
         ties = len([g for g in divGames if g.result=='tie'])
         r = Record(wins, losses, ties)
-        print(f'  {team:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')  
+        printRecord(team, r) 
     print()   
     
 def head2headDivision(*args):
@@ -208,8 +207,7 @@ def head2headDivision(*args):
         results[team] = Record(wins, losses, ties)
     print()
     for team in args:
-        r = results[team]
-        print(f'  {team:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')
+        printRecord(team, results[team])
     print()
     
 def commonGames(*args):
@@ -243,23 +241,20 @@ def commonGames(*args):
         results[team] = Record(wins, losses, ties) 
         print()
     for team in args:
-        r = results[team]
-        print(f'  {team:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')
+        printRecord(team, results[team])
     print()
         
     
 def victory(*args):
     print('Strength of Victory')
-    for t in args:
-        r = victoryStrength[t]
-        print(f'  {t:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')  
+    for team in args:
+        printRecord(team, victoryStrength[team]) 
     print()    
     
 def schedule(*args):
     print('Strength of Schedule')
-    for t in args:
-        r = scheduleStrength[t]
-        print(f'  {t:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')  
+    for team in args:
+        printRecord(team, scheduleStrength[team]) 
     print()    
     
 def combinedRankConference(*args):
@@ -324,17 +319,21 @@ def head2headSweep(*args):
     for team in args:
         common = [g for g in games[team] if g.opponent in args]
         if len(common) != others:
-            print(f'  {team} did not play all others.  Not applicable.')
+            print(f'  {team} did not play all others.  Not applicable.\n')
             return
         wins = len([g for g in common if g.result=='win'])
         losses = len([g for g in common if g.result=='loss'])
         ties = len([g for g in common if g.result=='tie'])
         results[team] = Record(wins, losses, ties)
     for team in args:
-        r = results[team]
-        print(f'  {team:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')
+        printRecord(team, results[team])
     print()
-        
+
+def printRecord(team, rec):
+    try:
+        print(f'  {team:25s} {rec.wins}-{rec.losses}-{rec.ties} {pct(rec):.3f}%')
+    except ZeroDivisionError:
+        print(f'  {team:25s} {rec.wins}-{rec.losses}-{rec.ties}')
         
 startup('2020-12-09')
 compare('KC', 'BUF', 'PIT')
