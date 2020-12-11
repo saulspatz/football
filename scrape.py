@@ -138,24 +138,26 @@ def compare(*args):
     divisions = {teams[team].division for team in args}
     if len(divisions) == 1:
         compareDivision(*args)
+    elif len(divisions)==len(args):
+        compareWildCard(*args)
     else:
-        compare2Wild(*args)
+        print('No more than one team in a division for wild card race.')
         
-def compare2Wild(team1, team2):
+def compareWildCard(*args):
     print()
     print('Overall')
-    for t in team1, team2:
+    for t in args:
         r = records[t]
         print(f'  {t:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')
-    head2(team1, team2)
-    conference2(team1, team2)
-    commonGames2(team1, team2)
-    victory2(team1, team2)
-    schedule2(team1, team2)
-    combinedRankConf2(team1, team2)
-    combinedRankOverall2(team1, team2)
-    netPointsConf2(team1, team2)
-    netPointsOverall2(team1, team2)
+    head2headSweep(*args)
+    conference(*args)
+    commonGames(*args)
+    victory2(*args)
+    schedule2(*args)
+    combinedRankConference(*args)
+    combinedRankOverall(*args)
+    netPointsConference(*args)
+    netPointsOverall(*args)
         
 def compareDivision(*args):
     print()
@@ -215,10 +217,10 @@ def commonGames(*args):
     results = { }
     for team in args:
         opponents[team] = {g.opponent for g in games[team]}  
-        common = reduce(lambda x, y: x&y, opponents.values(), {team for team in teams})
-        count = 0
-        for team in args:
-            count += len([g for g in games[team] if g.opponent in common])
+    common = reduce(lambda x, y: x&y, opponents.values(), {team for team in teams})
+    count = 0
+    for team in args:
+        count += len([g for g in games[team] if g.opponent in common])
     print('Common Opponents')
     if count < 4:
         print('  Insufficient common games')
@@ -291,9 +293,9 @@ def combinedRankOverall(*args):
         print(f'  {team:25s} scored {s} allowed {a} combined {a+s}')
     print()
         
-def netPointsConf2(team1, team2):
+def netPointsConference(*args):
     print('Net Points in Conference Games')
-    for team in team1, team2:
+    for team in args:
         net = sum([g.scored-g.allowed for g in games[team] if g.conference])
         print(f'  {team:25s} {net}')
     print()
@@ -315,6 +317,24 @@ def netPointsCommon(*args):
         net = sum(g.scored - g.allowed for g in games[team] if g.opponent in common)
         print(f'  {team:25s} {net}')
     print()    
-          
+def head2headSweep(*args):
+    print("Head to Head Sweep")
+    others = len(args) - 1
+    results = { }
+    for team in args:
+        common = [g for g in games[team] if g.opponent in args]
+        if len(common) != others:
+            print(f'  {team} did not play all others.  Not applicable.')
+            return
+        wins = len([g for g in common if g.result=='win'])
+        losses = len([g for g in common if g.result=='loss'])
+        ties = len([g for g in common if g.result=='tie'])
+        results[team] = Record(wins, losses, ties)
+    for team in args:
+        r = results[team]
+        print(f'  {team:25s} {r.wins}-{r.losses}-{r.ties} {pct(r):.3f}%')
+    print()
+        
+        
 startup('2020-12-09')
-compare('KC', 'LV', 'LAC')
+compare('KC', 'BUF', 'PIT')
