@@ -1,6 +1,9 @@
 from bs4 import BeautifulSoup
 from collections import defaultdict, namedtuple
 from functools import reduce
+import os
+import csv
+
 '''
 data from https://www.footballdb.com/games/index.html
 '''
@@ -174,7 +177,7 @@ def compareDivision(*args):
     combinedRankConference(*args)
     combinedRankOverall(*args) 
     netPointsCommon(*args)
-    #netPointsOverall2(team1, team2)
+    netPointsOverall2(*args)
     
 def conference(*args):
     print('Conference')
